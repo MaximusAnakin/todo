@@ -4,6 +4,8 @@ csx
 .vs
 edge
 Publish
+.vscode/
+*.msi
 
 *.user
 *.suo
