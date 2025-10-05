@@ -12,7 +12,7 @@ A simple, modern todo application built with React and Azure Functions, using Az
 ### Backend
 - Azure Functions v4 (Python)
 - Azure Table Storage for data persistence
-- Python 3.13
+- Python 3.13 
 
 ## Project Structure
 
