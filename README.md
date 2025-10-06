@@ -5,32 +5,32 @@ A simple, modern todo application built with React and Azure Functions, using Az
 ## Tech Stack
 
 ### Frontend
-- React 18 with Vite
+- React 18 with Vite 6
 - Vanilla CSS for styling
 - Fetch API for data fetching
 
 ### Backend
-- Azure Functions v4 (Python)
-- Azure Table Storage for data persistence
+- Azure Functions v4  (Python v2 isolated worker)
+- Azure Table Storage for data persistence (cloud-only)
 - Python 3.13 
 
 ## Project Structure
 
 ```
-├── frontend/                # React frontend application
+├── frontend/               # React frontend application
 │   ├── src/
 │   │   ├── services/       # API service layer
-│   │   ├── App.jsx        # Main application component
-│   │   └── index.css      # Global styles
-│   ├── .env               # Environment variables
+│   │   ├── App.jsx         # Main application component
+│   │   └── index.css       # Global styles
+│   ├── .env                # Environment variables
 │   └── package.json
 │
 ├── backend/                # Azure Functions backend
-│   ├── function_app.py    # Function app with endpoints
-│   ├── storage.py         # Azure Table Storage client
+│   ├── function_app.py     # Function app with endpoints
+│   ├── storage.py          # Azure Table Storage client
 │   └── requirements.txt    # Python dependencies
 │
-└── main.bicep             # Infrastructure as Code
+└── main.bicep              # Infrastructure as Code
 ```
 
 ## Features
@@ -47,7 +47,7 @@ A simple, modern todo application built with React and Azure Functions, using Az
 - Python 3.13 or higher
 - Azure Functions Core Tools v4
 - Azure CLI (for deployment)
-- Azure Storage Account (for Table Storage)
+- Azure Storage Account (for Table Storage, no local emulator needed)
 
 ### Backend Setup
 
@@ -67,7 +67,7 @@ A simple, modern todo application built with React and Azure Functions, using Az
      "IsEncrypted": false,
      "Values": {
        "FUNCTIONS_WORKER_RUNTIME": "python",
-       "AzureWebJobsStorage": "YOUR_STORAGE_CONNECTION_STRING"
+       "AzureWebJobsStorage": "STORAGE_CONNECTION_STRING"
      }
    }
    ```
@@ -106,6 +106,10 @@ The application will be available at `http://localhost:5173`
 ### Prerequisites
 - Azure subscription
 - Azure CLI installed and logged in
+- GitHub repository secrets:
+   - AZURE_STATIC_WEB_APPS_API_TOKEN
+   - API_BASE_URL (set to your Function App’s /api endpoint)
+
 
 ### Deployment Steps
 
@@ -129,28 +133,33 @@ The application will be available at `http://localhost:5173`
 4. Deploy the backend:
    ```bash
    cd backend
-   func azure functionapp publish <your-function-app-name>
+   func azure functionapp publish todo-backend-func --python
    ```
 
 5. Deploy the frontend:
+   ⚠️ Make sure your GitHub repository is connected to the Static Web App via the Azure Portal. This enables CI/CD and injects the required deployment token (AZURE_STATIC_WEB_APPS_API_TOKEN) into your repository secrets.
+   
+   You must also add the GitHub Actions workflow file manually to your repository (unless Azure created it for you). The file should be located at .github/workflows/azure-static-web-apps.yml and include steps to build and upload the frontend from frontend/dist.
+
    ```bash
-   cd frontend
-   npm run build
-   az storage blob upload-batch -d '$web' -s dist --account-name <your-storage-account-name>
+   git commit --allow-empty -m "Trigger frontend deploy"
+   git push origin main
    ```
 
 ### Infrastructure Components (Bicep)
 
 The `main.bicep` file creates:
-- Storage Account for frontend static hosting
-- Storage Account for backend data
-- Function App for backend API
-- Application Insights for monitoring
+- Azure Storage Account (for Table Storage)
+- Azure Function App (Python v2 backend)
+- Azure Static Web App (frontend)
+- Linux Consumption Plan
+- Application Insights
+
 
 ### Environment Configuration
 
 After deployment, update these settings:
-1. Function App application settings with storage connection string
+1. Add AzureWebJobsStorage to Function App settings
 2. Frontend environment variables with production API URL
 3. CORS settings in Function App to allow frontend domain
 

@@ -24,18 +24,10 @@ jobs:
       - name: Install and build frontend
         working-directory: ./frontend
         run: |
-          echo "Building with VITE_API_BASE_URL=$VITE_API_BASE_URL"
           npm ci
           npm run build
-          ls -la dist
         env:
           VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
-
-      - name: Show built bundle excerpt
-        working-directory: ./frontend
-        run: |
-          grep -n "todo-backend-func" dist -R || true
-          head -n 50 $(grep -ril "ListTasks" dist | head -n1) || true
 
       - name: Upload prebuilt frontend to Static Web App
         uses: Azure/static-web-apps-deploy@v1
