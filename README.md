@@ -2,6 +2,8 @@
 
 A simple, modern todo application built with React and Azure Functions, using Azure Table Storage for data persistence.
 
+Deployed app: https://lively-sky-06633ca03.1.azurestaticapps.net/
+
 ## Tech Stack
 
 ### Frontend
@@ -120,7 +122,18 @@ The application will be available at `http://localhost:5173`
 
 2. Create a resource group:
    ```bash
-   az group create --name todo-app-rg --location eastus
+   az group create --name todo-app-rg --location westeurope
+   ```
+
+3. Create the Storage Account (required by the Bicep file)
+
+   ```bash
+   az storage account create \
+   --name todostorageassignment \
+   --resource-group todo-app-rg \
+   --location westeurope \
+   --sku Standard_LRS \
+   --kind StorageV2
    ```
 
 3. Deploy the infrastructure using Bicep:
@@ -128,6 +141,9 @@ The application will be available at `http://localhost:5173`
    az deployment group create \
      --resource-group todo-app-rg \
      --template-file main.bicep
+     --parameters existingStorageName=todostorageassignment \
+              repoUrl=<github repo link here to use GitHub actions> \
+              repoBranch=main
    ```
 
 4. Deploy the backend:
